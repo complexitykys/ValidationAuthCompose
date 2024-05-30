@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">testauthcompose</string>
+    <string name="empty_usernameError">Username cannot be empty.</string>
+    <string name="empty_Error">Field cannot be empty.</string>
+    <string name="empty_passwordError">Password cannot be empty.</string>
+    <string name="weak_passwordError">Password is too weak. It must be at least 8 characters long and contain numbers and special characters.</string>
+    <string name="mismatch_passwordError">Passwords do not match.</string>
+    <string name="invalidCharacters_usernameError">Username contains invalid characters. Please avoid using symbols like #, ?, / etc.</string>
+    <string name="underage_error">You must be at least 18 years old to sign up.</string>
+    <string name="incorrect_fullnameError">Please enter your full name with at least two words (first and last name).</string>
 </resources>
