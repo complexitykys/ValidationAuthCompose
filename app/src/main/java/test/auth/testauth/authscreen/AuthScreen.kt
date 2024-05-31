@@ -128,22 +128,51 @@ fun AuthScreen(viewModel: AuthScreenViewModel = koinViewModel()) {
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            FirstLastNameTextField(fullName = state, onValueChanged = viewModel::reduceIntent)
+            FirstLastNameTextField(
+                fullName = state.fullName,
+                isError = state.fullNameValidationState.isFailure,
+                errorMessage = (state.fullNameValidationState as? Failure<FieldError>)?.data?.description,
+                onFullNameChange = { viewModel.reduceIntent(ChangeFullName(it)) },
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            UsernameTextField(username = state, onValueChanged = viewModel::reduceIntent)
+            UsernameTextField(
+                username = state.username,
+                isError = state.usernameValidationState.isFailure,
+                errorMessage = (state.usernameValidationState as? Failure<FieldError>)?.data?.description,
+                onUsernameChange = { viewModel.reduceIntent(ChangeUsername(it)) }
+            )
             Spacer(modifier = Modifier.height(24.dp))
 
-            BirthdayInput(dateOfBirth = state, onValueChanged = viewModel::reduceIntent)
+            BirthdayInput(
+                dateOfBirth = state.dateOfBirth,
+                isError = state.dateOfBirthValidationState.isFailure,
+                errorMessage = (state.dateOfBirthValidationState as? Failure<FieldError>)?.data?.description,
+                onDateOfBirthChange = { viewModel.reduceIntent(ChangeDateOfBirth(it)) }
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            PasswordTextField(password = state, onValueChanged = viewModel::reduceIntent)
+            PasswordTextField(
+                password = state.password,
+                isError = state.passwordValidationState.isFailure,
+                isPasswordVisible = state.showPassword,
+                errorMessage = (state.passwordValidationState as? Failure<FieldError>)?.data?.description,
+                onPasswordChange = { viewModel.reduceIntent(ChangePassword(it)) },
+                onPasswordVisibilityToggle = { viewModel.reduceIntent(TogglePasswordVisibility) }
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            ConfirmPasswordTextField(password = state, onValueChanged = viewModel::reduceIntent)
+            ConfirmPasswordTextField(
+                confirmPassword = state.confirmPassword,
+                isError = state.mismatchValidationState.isFailure,
+                isPasswordVisible = state.showConfirmPassword,
+                errorMessage = (state.mismatchValidationState as? Failure<FieldError>)?.data?.description,
+                onConfirmPasswordChange = { viewModel.reduceIntent(ChangeConfirmPassword(it)) },
+                onPasswordVisibilityToggle = { viewModel.reduceIntent(ToggleConfirmPasswordVisibility) }
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -166,25 +195,23 @@ fun AuthScreen(viewModel: AuthScreenViewModel = koinViewModel()) {
 
 @Composable
 fun FirstLastNameTextField(
-    fullName: AuthScreenState,
-    onValueChanged: (AuthIntent) -> Unit,
+    fullName: String,
+    isError: Boolean,
+    errorMessage: String?,
+    onFullNameChange: (String) -> Unit
 ) {
-    val validationState = fullName.fullNameValidationState
     OutlinedTextField(
-        value = fullName.fullName,
-        onValueChange = {
-            onValueChanged(ChangeFullName(it))
-        },
+        value = fullName,
+        onValueChange = onFullNameChange,
         label = { Text(text = "Full Name") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
         shape = ShapeDefaults.Small,
-        isError = validationState.isFailure,
+        isError = isError,
         supportingText = {
-            if (validationState.isFailure) {
-                val errorMessage = (validationState as Failure<FieldError>).data.description
+            if (isError) {
                 Text(
-                    text = errorMessage,
+                    text = errorMessage ?: "",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -194,27 +221,26 @@ fun FirstLastNameTextField(
     )
 }
 
+
 @Composable
 fun UsernameTextField(
-    username: AuthScreenState,
-    onValueChanged: (AuthIntent) -> Unit
+    username: String,
+    isError: Boolean,
+    errorMessage: String?,
+    onUsernameChange: (String) -> Unit
 ) {
-    val validationState = username.usernameValidationState
     OutlinedTextField(
-        value = username.username,
-        onValueChange = {
-            onValueChanged(ChangeUsername(it))
-        },
+        value = username,
+        onValueChange = onUsernameChange,
         label = { Text(text = "Username") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
         shape = ShapeDefaults.Small,
-        isError = validationState.isFailure,
+        isError = isError,
         supportingText = {
-            if (validationState.isFailure) {
-                val errorMessage = (validationState as Failure<FieldError>).data.description
+            if (isError) {
                 Text(
-                    text = errorMessage,
+                    text = errorMessage ?: "",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -224,38 +250,36 @@ fun UsernameTextField(
     )
 }
 
+
 @Composable
 fun BirthdayInput(
-    dateOfBirth: AuthScreenState,
-    onValueChanged: (AuthIntent) -> Unit
+    dateOfBirth: String,
+    isError: Boolean,
+    errorMessage: String?,
+    onDateOfBirthChange: (String) -> Unit
 ) {
-    val date = dateOfBirth.dateOfBirth
-    val validationState = dateOfBirth.dateOfBirthValidationState
     val isOpen = rememberSaveable { mutableStateOf(false) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-
         OutlinedTextField(
             readOnly = true,
-            value = date,
+            value = dateOfBirth,
             label = { Text("Date of Birth") },
             modifier = Modifier.fillMaxWidth(),
-            onValueChange = { onValueChanged(ChangeDateOfBirth(it)) },
+            onValueChange = { onDateOfBirthChange(it) },
             shape = ShapeDefaults.Small,
-            isError = validationState.isFailure,
+            isError = isError,
             supportingText = {
-                if (validationState.isFailure) {
-                    val errorMessage = (validationState as Failure<FieldError>).data.description
+                if (isError) {
                     Text(
-                        text = errorMessage,
+                        text = errorMessage ?: "",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
             },
             trailingIcon = {
-                IconButton(onClick = { isOpen.value = true } // show de dialog
-                ) {
+                IconButton(onClick = { isOpen.value = true }) {
                     Icon(imageVector = Icons.Rounded.DateRange, contentDescription = "Calendar")
                 }
             },
@@ -264,17 +288,20 @@ fun BirthdayInput(
     }
 
     if (isOpen.value) {
-        CustomDatePickerDialog(onAccept = { dateMillis ->
-            isOpen.value = false // close dialog
-
-            dateMillis?.let {
-                val selectedDate = Instant.ofEpochMilli(it).atZone(ZoneId.of("UTC")).toLocalDate()
-                onValueChanged(ChangeDateOfBirth(selectedDate.toString()))
-            }
-        },
-            onCancel = { isOpen.value = false })
+        CustomDatePickerDialog(
+            onAccept = { dateMillis ->
+                isOpen.value = false
+                dateMillis?.let {
+                    val selectedDate =
+                        Instant.ofEpochMilli(it).atZone(ZoneId.of("UTC")).toLocalDate()
+                    onDateOfBirthChange(selectedDate.toString())
+                }
+            },
+            onCancel = { isOpen.value = false }
+        )
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -298,36 +325,37 @@ fun CustomDatePickerDialog(
 
 @Composable
 fun PasswordTextField(
-    password: AuthScreenState,
-    onValueChanged: (AuthIntent) -> Unit
+    password: String,
+    isPasswordVisible: Boolean,
+    isError: Boolean,
+    errorMessage: String?,
+    onPasswordChange: (String) -> Unit,
+    onPasswordVisibilityToggle: () -> Unit
 ) {
-    val validationState = password.passwordValidationState
     OutlinedTextField(
-        value = password.password,
-        onValueChange = {
-            onValueChanged(ChangePassword(it))
-        },
+        value = password,
+        onValueChange = onPasswordChange,
         label = { Text(text = "Password") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
         shape = ShapeDefaults.Small,
-        isError = validationState.isFailure,
+        isError = isError,
         supportingText = {
-            if (validationState.isFailure) {
-                val errorMessage = (validationState as Failure<FieldError>).data.description
+            if (isError) {
                 Text(
-                    text = errorMessage,
+                    text = errorMessage ?: "",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.error
                 )
             }
         },
         trailingIcon = {
-            PasswordVisibilityToggle(isPasswordVisible = password.showPassword) {
-                onValueChanged(TogglePasswordVisibility)
-            }
+            PasswordVisibilityToggle(
+                isPasswordVisible = isPasswordVisible,
+                onToggle = onPasswordVisibilityToggle
+            )
         },
-        visualTransformation = if (password.showPassword) {
+        visualTransformation = if (isPasswordVisible) {
             VisualTransformation.None
         } else {
             PasswordVisualTransformation()
@@ -336,38 +364,40 @@ fun PasswordTextField(
     )
 }
 
+
 @Composable
 fun ConfirmPasswordTextField(
-    password: AuthScreenState,
-    onValueChanged: (AuthIntent) -> Unit
+    confirmPassword: String,
+    isPasswordVisible: Boolean,
+    isError: Boolean,
+    errorMessage: String?,
+    onConfirmPasswordChange: (String) -> Unit,
+    onPasswordVisibilityToggle: () -> Unit
 ) {
-    val validationState = password.mismatchValidationState
     OutlinedTextField(
-        value = password.confirmPassword,
-        onValueChange = {
-            onValueChanged(ChangeConfirmPassword(it))
-        },
+        value = confirmPassword,
+        onValueChange = onConfirmPasswordChange,
         label = { Text(text = "Confirm Password") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
         shape = ShapeDefaults.Small,
-        isError = validationState.isFailure,
+        isError = isError,
         supportingText = {
-            if (validationState.isFailure) {
-                val errorMessage = (validationState as Failure<FieldError>).data.description
+            if (isError) {
                 Text(
-                    text = errorMessage,
+                    text = errorMessage ?: "",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.error
                 )
             }
         },
         trailingIcon = {
-            PasswordVisibilityToggle(isPasswordVisible = password.showConfirmPassword) {
-                onValueChanged(ToggleConfirmPasswordVisibility)
-            }
+            PasswordVisibilityToggle(
+                isPasswordVisible = isPasswordVisible,
+                onToggle = onPasswordVisibilityToggle
+            )
         },
-        visualTransformation = if (password.showConfirmPassword) {
+        visualTransformation = if (isPasswordVisible) {
             VisualTransformation.None
         } else {
             PasswordVisualTransformation()
@@ -375,6 +405,7 @@ fun ConfirmPasswordTextField(
         colors = customTextFieldColors()
     )
 }
+
 
 @Composable
 fun PasswordVisibilityToggle(
@@ -391,7 +422,6 @@ fun PasswordVisibilityToggle(
         Icon(imageVector = image, contentDescription = null)
     }
 }
-
 
 
 @Preview(showSystemUi = true)
