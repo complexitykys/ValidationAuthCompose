@@ -3,8 +3,9 @@ package test.auth.testauth.authscreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import test.auth.testauth.domain.auth.FieldError
+import test.auth.testauth.domain.validation.Success
+import test.auth.testauth.domain.validation.ValidationResult
 import test.auth.testauth.domain.validation.Validator
-import test.auth.testauth.domain.validation.isFailure
 
 class AuthReducer(
     private val fullNameValidator: Validator<String, FieldError>,
@@ -75,16 +76,15 @@ class AuthReducer(
     }
 }
 
+private fun ValidationResult<String, *>.isNotBlankAndSuccess(): Boolean {
+    return this is Success && this.data.isNotBlank()
+}
+
 
 fun AuthScreenState.validateButtonAccess() = copy(
-    isButtonEnabled = fullName.isNotBlank() &&
-            !fullNameValidationState.isFailure &&
-            username.isNotBlank() &&
-            !usernameValidationState.isFailure &&
-            dateOfBirth.isNotBlank() &&
-            !dateOfBirthValidationState.isFailure &&
-            password.isNotBlank() &&
-            !passwordValidationState.isFailure &&
-            confirmPassword.isNotBlank() &&
-            !mismatchValidationState.isFailure
+    isButtonEnabled = fullNameValidationState.isNotBlankAndSuccess() &&
+            usernameValidationState.isNotBlankAndSuccess() &&
+            dateOfBirthValidationState.isNotBlankAndSuccess() &&
+            passwordValidationState.isNotBlankAndSuccess() &&
+            mismatchValidationState.isNotBlankAndSuccess()
 )
