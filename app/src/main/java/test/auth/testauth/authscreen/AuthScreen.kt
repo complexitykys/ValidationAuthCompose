@@ -59,7 +59,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import test.auth.testauth.R
@@ -75,7 +74,7 @@ import java.time.ZoneId
 @Composable
 fun AuthScreen(viewModel: AuthScreenViewModel = koinViewModel()) {
 
-    val state: AuthScreenState by viewModel.authScreenState.collectAsState(Dispatchers.Main.immediate)
+    val state by viewModel.state.collectAsState()
 
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
@@ -132,7 +131,7 @@ fun AuthScreen(viewModel: AuthScreenViewModel = koinViewModel()) {
                 fullName = state.fullName,
                 isError = state.fullNameValidationState.isFailure,
                 errorMessage = (state.fullNameValidationState as? Failure<FieldError>)?.data?.description,
-                onFullNameChange = { viewModel.reduceIntent(ChangeFullName(it)) },
+                onFullNameChange = { viewModel.reduce(ChangeFullName(it)) },
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -141,7 +140,7 @@ fun AuthScreen(viewModel: AuthScreenViewModel = koinViewModel()) {
                 username = state.username,
                 isError = state.usernameValidationState.isFailure,
                 errorMessage = (state.usernameValidationState as? Failure<FieldError>)?.data?.description,
-                onUsernameChange = { viewModel.reduceIntent(ChangeUsername(it)) }
+                onUsernameChange = { viewModel.reduce(ChangeUsername(it)) }
             )
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -149,7 +148,7 @@ fun AuthScreen(viewModel: AuthScreenViewModel = koinViewModel()) {
                 dateOfBirth = state.dateOfBirth,
                 isError = state.dateOfBirthValidationState.isFailure,
                 errorMessage = (state.dateOfBirthValidationState as? Failure<FieldError>)?.data?.description,
-                onDateOfBirthChange = { viewModel.reduceIntent(ChangeDateOfBirth(it)) }
+                onDateOfBirthChange = { viewModel.reduce(ChangeDateOfBirth(it)) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -159,8 +158,8 @@ fun AuthScreen(viewModel: AuthScreenViewModel = koinViewModel()) {
                 isError = state.passwordValidationState.isFailure,
                 isPasswordVisible = state.showPassword,
                 errorMessage = (state.passwordValidationState as? Failure<FieldError>)?.data?.description,
-                onPasswordChange = { viewModel.reduceIntent(ChangePassword(it)) },
-                onPasswordVisibilityToggle = { viewModel.reduceIntent(TogglePasswordVisibility) }
+                onPasswordChange = { viewModel.reduce(ChangePassword(it)) },
+                onPasswordVisibilityToggle = { viewModel.reduce(TogglePasswordVisibility) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -170,8 +169,8 @@ fun AuthScreen(viewModel: AuthScreenViewModel = koinViewModel()) {
                 isError = state.mismatchValidationState.isFailure,
                 isPasswordVisible = state.showConfirmPassword,
                 errorMessage = (state.mismatchValidationState as? Failure<FieldError>)?.data?.description,
-                onConfirmPasswordChange = { viewModel.reduceIntent(ChangeConfirmPassword(it)) },
-                onPasswordVisibilityToggle = { viewModel.reduceIntent(ToggleConfirmPasswordVisibility) }
+                onConfirmPasswordChange = { viewModel.reduce(ChangeConfirmPassword(it)) },
+                onPasswordVisibilityToggle = { viewModel.reduce(ToggleConfirmPasswordVisibility) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
